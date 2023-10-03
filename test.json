@@ -1,0 +1,9 @@
+{
+  "email": "xyz@gmail.com",
+  "phone": 1234567890,
+  "password": "fsas@123",
+  "address": "dfasdv sdfsdaa dasf 232232",
+  "placeOfUse": "qwerty",
+  "allDevice": ["12", 45, "dsdf"],
+  "roomArray": [12, 56, "g4"]
+}
