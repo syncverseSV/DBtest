@@ -2,8 +2,11 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
+const http = require("http");
 const cors = require("cors");
 const app = express();
+const server = http.createServer(app);
+const io = require("socket.io")(server);
 app.use(express.static("public"));
 dotenv.config();
 app.use(cors());
@@ -35,11 +38,11 @@ const Schema = new mongoose.Schema({
 
 const DBModel = mongoose.model("Data", Schema);
 
-app.listen(process.env.PORT || 3000, (err) => {
+server.listen(process.env.PORT, (err) => {
   if (err) {
-    console.log(err);
+    throw err;
   } else {
-    console.log(`server in running on port 3000`);
+    console.log(`Server in running on port ${process.env.PORT}`);
   }
 });
 
@@ -87,4 +90,34 @@ app.put("/", async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
   }
+});
+
+app.get("/connect", (req, res) => {
+  io.on("connection", (socket) => {
+    console.log("A user connected");
+
+    socket.on("joinRoom", (room) => {
+      console.log(`${socket.id} just joined room ${room}`);
+      socket.join(room);
+      io.to(room).emit("roomJoined", `${socket.id} just joined the room`);
+
+      socket.on("update", (data) => {
+        const dataOut = JSON.parse(data);
+        console.log(dataOut);
+        socket.broadcast.to(room).emit("dataChange", dataOut);
+      });
+    });
+
+    socket.on("leaveRoom", (room) => {
+      console.log(`${socket.id} has left room ${room}`);
+
+      socket.leave(room);
+
+      io.to(room).emit("roomLeft", `${socket.id} has left the room`);
+    });
+  });
+
+  res.sendFile(__dirname + "/index.html", (err) => {
+    console.log(err);
+  });
 });

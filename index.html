@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<head>
+    <title>connection</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+  const socket = io();
+function JoinRoom (){
+ const roomId = document.getElementById('roomId').value;
+ console.log(roomId);
+  socket.emit('joinRoom', roomId);
+  };
+  
+
+ socket.on("dataChange",(data)=>{
+   console.log(data);
+  
+
+  });
+</script>
+
+</head>
+<body style="text-align: center;">
+  <h1 class="heading">Connect to device!</h1>
+    <form onsubmit="JoinRoom()">
+      <input id="roomId" type="email">
+      <button id="submit_btn" type="submit">Connect</button>
+    </form>
+   
+    </div>
+</body>
+</html>
