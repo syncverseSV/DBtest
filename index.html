@@ -1,49 +1,61 @@
 <!DOCTYPE html>
 <head>
     <title>connection</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-
-  const socket = io();
-function JoinRoom (){
- const roomId = document.getElementById('roomId').value;
- console.log(roomId);
-  socket.emit('joinRoom', roomId);
-  };
-  function ChangeData(){
-    let inputdata = {
-      name : document.getElementById("DataTxt").value,
-  }
-  socket.emit('update', inputdata);
-   documnet.getElementById('name').innerHTML = document.getElementById("DataTxt").value;
-}
-  
-
- socket.on("dataChange",(data)=>{
-   console.log(data);
-   documnet.getElementById('name').innerHTML = data.name;
-  
-
-  });
-</script>
+    
+   
 
 </head>
 <body style="text-align: center;">
   <h1 class="heading">Connect to device!</h1>
-    <form onsubmit="JoinRoom()">
-      <input id="roomId" type="email">
+    
+      <input id="roomId" type="text">
       <button id="submit_btn" type="submit">Connect</button>
-    </form>
+    
 
     <h1 class="name">initial</h1>
 
     <h1 id="name" class="heading">Change data</h1>
 
-    <form onsubmit="ChangeData()">
+    
       <input id="DataTxt" type="text">
-      <button  type="submit">Change</button>
-    </form>
+      
+      <button id="changeBtn">Change</button>
+
    
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+     <script>
+
+  const socket = io();
+  var roomId ="";
+
+ document.getElementById('submit_btn').addEventListener("click",()=>{
+ roomId = document.getElementById('roomId').value;
+ console.log(roomId);
+
+  socket.emit('JoinRoom', {roomname: roomId, username:"Phone"});
+  return roomId;
+  });
+  document.getElementById('changeBtn').addEventListener("click",()=>{
+    let inputdata = {
+      message : document.getElementById("DataTxt").value,
+      roomname: roomId,
+      username:"Phone",
+
+  }
+  document.getElementById('name').innerHTML = inputdata.message;
+  socket.emit("chat", inputdata);
+
+   
+})
+  
+
+ socket.on("chat",(data)=>{
+   console.log(data);
+   document.getElementById('name').innerHTML = data.message;
+  
+
+  });
+</script>
 </body>
 </html>

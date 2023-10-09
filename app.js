@@ -94,30 +94,46 @@ app.put("/", async (req, res) => {
 
 app.get("/connect", (req, res) => {
   io.on("connection", (socket) => {
-    console.log("A user connected");
+    socket.on("JoinRoom", (data) => {
+      //Storing users connected in a room in memory
+      var user = {};
+      var users = {};
+      user[socket.id] = data.username;
+      if (users[data.roomname]) {
+        users[data.roomname].push(user);
+      } else {
+        users[data.roomname] = [user];
+      }
+      console.log(data.roomname);
 
-    socket.on("joinRoom", (room) => {
-      console.log(`${socket.id} just joined room ${room}`);
-      socket.join(room);
-      io.to(room).emit("roomJoined", `${socket.id} just joined the room`);
+      //Joining the Socket Room
+      socket.join(data.roomname);
 
-      socket.on("update", (data) => {
-        const dataOut = JSON.parse(data);
-        console.log(dataOut);
-        socket.broadcast.to(room).emit("dataChange", dataOut);
+      //Emitting New Username to Clients
+      io.to(data.roomname).emit("joined-user", { username: data.username });
+
+      //Emitting messages to Clients
+      socket.on("chat", (data) => {
+        io.to(data.roomname).emit("chat", {
+          username: data.username,
+          message: data.message,
+        });
+        console.log(data.message);
+      });
+
+      //Remove user from memory when they disconnect
+      socket.on("disconnecting", () => {
+        var rooms = Object.keys(socket.rooms);
+        var socketId = rooms[0];
+        var roomname = rooms[1];
+        users[roomname].forEach((user, index) => {
+          if (user[socketId]) {
+            users[roomname].splice(index, 1);
+          }
+        });
       });
     });
-
-    socket.on("leaveRoom", (room) => {
-      console.log(`${socket.id} has left room ${room}`);
-
-      socket.leave(room);
-
-      io.to(room).emit("roomLeft", `${socket.id} has left the room`);
-    });
   });
 
-  res.sendFile(__dirname + "/index.html", (err) => {
-    console.log(err);
-  });
+  res.sendfile("./index.html");
 });
