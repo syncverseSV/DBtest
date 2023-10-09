@@ -10,10 +10,18 @@ function JoinRoom (){
  console.log(roomId);
   socket.emit('joinRoom', roomId);
   };
+  function ChangeData(){
+    let inputdata = {
+      name : document.getElementById("DataTxt").value,
+  }
+  socket.emit('update', inputdata);
+   documnet.getElementById('name').innerHTML = document.getElementById("DataTxt").value;
+}
   
 
  socket.on("dataChange",(data)=>{
    console.log(data);
+   documnet.getElementById('name').innerHTML = data.name;
   
 
   });
@@ -25,6 +33,15 @@ function JoinRoom (){
     <form onsubmit="JoinRoom()">
       <input id="roomId" type="email">
       <button id="submit_btn" type="submit">Connect</button>
+    </form>
+
+    <h1 class="name">initial</h1>
+
+    <h1 id="name" class="heading">Change data</h1>
+
+    <form onsubmit="ChangeData()">
+      <input id="DataTxt" type="text">
+      <button  type="submit">Change</button>
     </form>
    
     </div>
